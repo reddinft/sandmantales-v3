@@ -112,22 +112,9 @@ export async function incrementAuthUserUsage(userId: string): Promise<void> {
   const supabase = getServiceClient()
   const periodStart = getPeriodStart()
 
-  // Upsert usage_counts row, incrementing story_count
-  const { data: existing } = await supabase
-    .from('usage_counts')
-    .select('id, story_count')
-    .eq('user_id', userId)
-    .eq('period_start', periodStart)
-    .single()
-
-  if (existing) {
-    await supabase
-      .from('usage_counts')
-      .update({ story_count: existing.story_count + 1 })
-      .eq('id', existing.id)
-  } else {
-    await supabase
-      .from('usage_counts')
-      .insert({ user_id: userId, period_start: periodStart, story_count: 1 })
-  }
+  // Atomic upsert via RPC — avoids read-then-write race condition
+  await supabase.rpc('increment_usage', {
+    p_user_id: userId,
+    p_period_start: periodStart,
+  })
 }
