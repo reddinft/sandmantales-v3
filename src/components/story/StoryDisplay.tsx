@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 
 interface StoryDisplayProps {
   storyId: string
@@ -192,11 +193,16 @@ export function StoryDisplay({
     >
       {/* Illustration */}
       {imageUrl ? (
-        <img
-          src={imageUrl}
-          alt={`Illustration for ${childName}'s story`}
-          style={{ width: '100%', maxHeight: '280px', objectFit: 'cover', display: 'block' }}
-        />
+        <div style={{ position: 'relative', width: '100%', height: '280px' }}>
+          <Image
+            src={imageUrl}
+            alt={`Illustration for ${childName}'s story`}
+            fill
+            sizes="(max-width: 768px) 100vw, 700px"
+            style={{ objectFit: 'cover' }}
+            unoptimized
+          />
+        </div>
       ) : (
         <div
           style={{

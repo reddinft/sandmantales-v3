@@ -34,6 +34,22 @@ interface HomePageProps {
   searchParams: Promise<{ signin?: string }>
 }
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'SandmanTales',
+  description: 'AI-powered personalised bedtime stories for children aged 3-8',
+  applicationCategory: 'LifestyleApplication',
+  operatingSystem: 'Web',
+  url: 'https://sandmantales.com',
+  offers: {
+    '@type': 'Offer',
+    price: '9.99',
+    priceCurrency: 'USD',
+    description: 'Monthly subscription — unlimited personalised bedtime stories',
+  },
+}
+
 export default async function HomePage({ searchParams }: HomePageProps) {
   const count = await getStoryCount()
   const params = await searchParams
@@ -41,6 +57,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   return (
     <main style={{ background: '#0D1B2A', minHeight: '100vh' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Auto-opens SignInModal when ?signin=true is in the URL */}
       <HomepageSignInGate autoOpen={autoOpenSignIn} />
 

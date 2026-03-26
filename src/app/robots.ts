@@ -1,11 +1,16 @@
 import { MetadataRoute } from 'next'
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://sandmantales.com'
+
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-    },
-    sitemap: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/sitemap.xml`,
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/account', '/api/'],
+      },
+    ],
+    sitemap: `${APP_URL}/sitemap.xml`,
   }
 }

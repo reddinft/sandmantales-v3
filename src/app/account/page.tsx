@@ -6,6 +6,7 @@
 
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createServerClient } from '@/lib/supabase-server'
 import { getUserTier } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
@@ -272,18 +273,16 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
                       onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)')}
                     >
                       {story.image_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={story.image_url}
-                          alt={`Story for ${story.child_name}`}
-                          style={{
-                            width: '52px',
-                            height: '52px',
-                            borderRadius: '8px',
-                            objectFit: 'cover',
-                            flexShrink: 0,
-                          }}
-                        />
+                        <div style={{ position: 'relative', width: '52px', height: '52px', flexShrink: 0 }}>
+                          <Image
+                            src={story.image_url}
+                            alt={`Story for ${story.child_name}`}
+                            fill
+                            sizes="52px"
+                            style={{ borderRadius: '8px', objectFit: 'cover' }}
+                            unoptimized
+                          />
+                        </div>
                       ) : (
                         <div
                           style={{
