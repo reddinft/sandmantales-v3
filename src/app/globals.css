@@ -5,11 +5,38 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Base colours */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+
+  /* SandmanTales design system */
+  --color-midnight:    #0D1B2A;
+  --color-indigo-deep: #162032;
+  --color-indigo-lift: #1A2E45;
+  --color-night:       #0D1B2A;
+  --color-night-card:  #162032;
+  --color-night-deep:  #0A1520;
+  --color-night-primary: #1A2E45;
+  --color-amber:       #F5A623;
+  --color-amber-deep:  #E0931A;
+  --color-gold:        #F5C542;
+  --color-cream:       #F4EFE6;
+  --color-muted-lavender: #B8B0C8;
+  --color-star-shimmer: #E8F4FD;
+
+  /* Fonts */
+  --font-sans:   var(--font-inter), system-ui, sans-serif;
+  --font-serif:  var(--font-playfair), Georgia, serif;
+  --font-mono:   var(--font-geist-mono);
+  --font-heading: var(--font-playfair), Georgia, serif;
+
+  /* Shadows */
+  --shadow-cta:      0 4px 20px rgba(245, 166, 35, 0.35);
+  --shadow-cta-hover: 0 6px 28px rgba(245, 166, 35, 0.5);
+  --shadow-card:     0 8px 40px rgba(0, 0, 0, 0.4);
+  --shadow-lifetime: 0 0 40px rgba(245, 197, 66, 0.08);
+
+  /* Sidebar (kept for shadcn compat) */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -126,5 +153,45 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* Starfield twinkle animation */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.9; }
+}
+
+/* Hero name fade animation */
+@keyframes nameFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-twinkle {
+  animation: twinkle var(--twinkle-duration, 3s) ease-in-out infinite;
+  animation-delay: var(--twinkle-delay, 0s);
+}
+
+.animate-name-fade {
+  animation: nameFadeIn 0.3s ease-in-out;
+}
+
+/* Floating illustration */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-12px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-twinkle,
+  .animate-float,
+  .animate-name-fade {
+    animation: none;
   }
 }
