@@ -1,5 +1,51 @@
 
 ---
+## Phase 6 — Stripe Payments (2026-03-26)
+**Build:** ✅ `npm run build` passes (clean, 0 TypeScript errors, 0 warnings)
+**Commit:** cee2a86 → pushed to main
+
+### Delivered
+
+**`src/app/api/stripe/checkout/route.ts`** (replaced stub)
+- POST: requires auth (401 if not), get/create Stripe customer (stores to `users.stripe_customer_id`), creates Checkout Session (`subscription` mode for monthly, `payment` for lifetime), returns `{ checkoutUrl }`
+- Env vars used: `STRIPE_MONTHLY_PRICE_ID`, `STRIPE_LIFETIME_PRICE_ID`, `NEXT_PUBLIC_APP_URL`
+
+**`src/app/api/stripe/webhook/route.ts`** (replaced stub)
+- POST: raw body via `request.text()` for Stripe signature verification
+- Verifies signature with `stripe.webhooks.constructEvent` — returns 400 on invalid sig
+- `checkout.session.completed`: idempotency check (skip if `stripe_event_id` already set to `event.id`), updates tier/status/customer/subscription/event_id
+- `customer.subscription.deleted`: downgrades to `free`, sets `subscription_status: 'canceled'`
+- `invoice.payment_failed`: sets `subscription_status: 'past_due'`, does NOT downgrade tier (grace period, Stripe retries 3x)
+- Removed deprecated `export const config = { api: { bodyParser: false } }` (Pages Router syntax, not needed in App Router)
+
+**`src/app/api/stripe/portal/route.ts`** (replaced stub)
+- POST: creates Customer Portal session, returns `{ portalUrl }`
+- GET: full redirect flow (for direct `<Link href="/api/stripe/portal">`) — redirects to Stripe portal or to `/?signin=true` if unauthenticated
+
+**`src/app/account/page.tsx`** — added `searchParams` prop, `?payment=success` shows green callout "🎉 Welcome to [tierLabel] — unlimited stories await!"
+
+**`src/components/story/UpgradeWall.tsx`** — full rewrite:
+- `handleMonthly`/`handleLifetime` now POST to `/api/stripe/checkout` and redirect to `checkoutUrl`
+- Loading states on buttons during checkout session creation (`…` price text, `cursor: not-allowed`, sibling button dimmed)
+- 401 response → opens `SignInModal` first, stores `pendingPlan`, resumes checkout via `onSuccess` callback
+- Error state displayed inside the wall card
+
+**`src/lib/stripe.ts`** — changed to lazy init (proxy pattern) to avoid `STRIPE_SECRET_KEY` not-set errors at build time
+
+**`supabase/migrations/004_stripe_columns.sql`** — audit note confirming all columns already existed in Phase 1 schema; no ALTER TABLE needed
+
+### Things Nissan needs to action before Stripe works end-to-end
+1. Create Monthly Price ($9.99/mo recurring) in Stripe dashboard → set `STRIPE_MONTHLY_PRICE_ID` env var in Vercel
+2. Create Lifetime Price ($49 one-time) in Stripe dashboard → set `STRIPE_LIFETIME_PRICE_ID` env var in Vercel
+3. Add `STRIPE_WEBHOOK_SECRET` from Stripe dashboard webhook config → Vercel env vars
+4. Configure Stripe Customer Portal in Stripe dashboard (billing.stripe.com/settings/billing/portal)
+5. Apply migration `004_stripe_columns.sql` to Supabase (it's a no-op comment — no action needed)
+
+### Deviations
+- `stripe.ts` uses a Proxy for backward-compat with `import { stripe }` pattern. Could be simplified to `export const getStripe()` calls throughout, but Proxy avoids touching all consumers.
+- Portal GET handler added (not in original spec) because account page uses `<Link href="/api/stripe/portal">` — without GET support, the link would hit a 405.
+
+---
 ## Phase 4 — Story Creation Flow (2026-03-26)
 
 **Task:** Build Phase 4 of SandmanTales v3 — Story Creation Flow (Guest Mode, Free Story Counter, Upgrade Wall)
