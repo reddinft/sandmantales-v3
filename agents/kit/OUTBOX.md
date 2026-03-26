@@ -105,3 +105,28 @@
 - Generate demo story audio (`public/demo-story.mp3`) — via `/api/story/generate` once API keys live
 - Wire up `NEXT_PUBLIC_APP_URL` env var in Vercel (needed for server-side story count fetch)
 - Stripe lifetime plan (`price_lifetime`) in Stripe dashboard for `/api/stripe/checkout?plan=lifetime`
+
+---
+## Phase 5 — Auth + User Account
+**Date:** 2026-03-26
+**Build:** ✅ `npm run build` passes
+**Commit:** 05ab5d0 → pushed to main
+
+### Delivered
+- `src/lib/auth.ts` — server-only helpers: `getUser`, `getUserTier`, `migrateGuestToUser`
+- `src/lib/auth-client.ts` — browser-only helpers: `signUp`, `signIn`, `signInWithMagicLink`, `signOut`
+- `src/lib/supabase.ts` — split to browser-only (no next/headers)
+- `src/lib/supabase-server.ts` — new file for server client (next/headers safe)
+- `src/app/api/auth/route.ts` — POST actions: signup (with guest migration), signin, signout, magic-link
+- `src/components/auth/SignInModal.tsx` — overlay modal, sign in/create account tabs, magic link mode, guest cookie migration on signup
+- `src/components/auth/HomepageSignInGate.tsx` — auto-opens SignInModal when `?signin=true`
+- `src/app/account/page.tsx` — protected server component: tier badge, usage + progress bar, story history, sign out
+- `src/app/account/SignOutButton.tsx` — client sign out button
+- `src/app/page.tsx` — updated to pass searchParams to HomepageSignInGate
+- `src/proxy.ts` — extended to redirect `/account` to `/?signin=true` if unauthenticated
+
+### Deviations
+- `SignUpModal` is re-exported from `SignInModal.tsx` as a thin wrapper (same component, `initialTab="signup"`) per spec guidance
+- `src/lib/supabase.ts` was split into two files (`supabase.ts` browser + `supabase-server.ts` server) to avoid Turbopack bundler errors from mixing `next/headers` with client-bound imports
+- No `src/middleware.ts` created — Next.js 16 uses `proxy.ts` exclusively (conflict would break build)
+- Build warning: `supabaseUrl is required` during static generation of `/api/story/count` — expected, uses fallback count, non-fatal
