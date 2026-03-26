@@ -1,5 +1,38 @@
 
 ---
+## Phase 4 — Story Creation Flow (2026-03-26)
+
+**Task:** Build Phase 4 of SandmanTales v3 — Story Creation Flow (Guest Mode, Free Story Counter, Upgrade Wall)
+
+**Build status:** ✅ `npm run build` passes — 15 pages, Turbopack, TypeScript clean, 0 errors
+
+**Commit:** `53bf853` pushed to `main` on GitHub
+
+### New files
+
+**`src/components/story/`**
+- `StoryForm.tsx` — multi-field form: name input (max 50), age buttons (3-8), live prompt label "What happened in [Name]'s day?", char counter (X/500), rotating loading messages (4s cycle: writing/recording/painting), error state, animated ✨ submit button
+- `StoryDisplay.tsx` — full story card: illustration (`<img>` or gradient placeholder), Playfair Display text, custom HTML5 audio player (matches DemoSection pattern), stories-remaining badge, share-to-clipboard button, create-another button
+- `UpgradeWall.tsx` — fixed overlay modal on 402: monthly $9.99/mo + lifetime $49 (⭐ Best Value badge), dismiss → redirect home, sign-up nudge
+- `SavePrompt.tsx` — soft nudge after first guest story: "Save it — it's free" CTA + dismiss
+- `StoriesRemainingBadge.tsx` — polls `GET /api/story/usage`, shows count variant (3/2/Last free story), hidden for paid tiers
+- `StoryCreationFlow.tsx` — client orchestrator: manages `smt_guest_id` cookie (nanoid, SameSite=Lax, 7-day expiry), wires form→display→upgradewall, post-story save prompt logic
+
+**`src/app/create/page.tsx`** — replaced stub with server component passing `isAuthed` + `userTier` to client children
+
+**`supabase/migrations/002_usage_rpc.sql`** — `increment_usage` function: atomic INSERT ... ON CONFLICT DO UPDATE
+
+### Fix: race condition in `src/lib/usage.ts`
+- `incrementAuthUserUsage`: replaced read-then-write with `supabase.rpc('increment_usage', ...)` atomic upsert
+- Requires 002 migration to be applied in Supabase dashboard (or via Supabase CLI)
+
+### Deviations / notes for Loki
+1. **Sign-up modal**: `SavePrompt` and `UpgradeWall` link to `/auth/signup` (redirect). No sign-up modal exists yet — Phase 5 presumably covers auth UI. This is a safe redirect fallback.
+2. **`smt_guest_id` cookie**: Set client-side (HttpOnly=false as spec requires, SameSite=Lax). This means the usage API `/api/story/usage` checks for the cookie via `req.cookies` — the existing route reads `guest_session_id` (not `smt_guest_id`). **Flag for Oli/QA:** The cookie names don't match. Usage API route (`/api/story/usage`) reads `req.cookies.get('guest_session_id')`. Client sends `smt_guest_id`. Fix: either update the route to read `smt_guest_id`, or pass `guestSessionId` as a query param (current fallback path used by `StoryCreationFlow`). The current code uses the query param fallback as primary, which works — but the cookie-based path in the API route won't find it. Low risk for now.
+3. **StoriesRemainingBadge refresh**: Refreshes after story generation completes. Initial load may show stale data before first fetch resolves.
+4. **pre-existing build warning**: `/api/story/count` emits `supabaseUrl is required` at build time (not from Phase 4) — pre-existing issue from Phase 2.
+
+---
 ## Phase 2 — Core Story Generation API (2026-03-26)
 
 **Task:** Build Phase 2 of SandmanTales v3 — Core Story Generation API
