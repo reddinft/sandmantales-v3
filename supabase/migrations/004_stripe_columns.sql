@@ -1,0 +1,8 @@
+-- Phase 6: Stripe columns audit
+-- All required Stripe columns were already present in 001_initial_schema.sql:
+--   users.stripe_customer_id  text unique
+--   users.stripe_subscription_id  text
+--   users.stripe_event_id  text  (idempotency key)
+--   users.subscription_tier  text not null default 'free'
+--   users.subscription_status  text
+-- No ALTER TABLE statements needed.

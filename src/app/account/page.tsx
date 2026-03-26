@@ -33,7 +33,14 @@ interface Story {
   image_url: string | null
 }
 
-export default async function AccountPage() {
+interface AccountPageProps {
+  searchParams: Promise<{ payment?: string }>
+}
+
+export default async function AccountPage({ searchParams }: AccountPageProps) {
+  const { payment } = await searchParams
+  const paymentSuccess = payment === 'success'
+
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -95,6 +102,27 @@ export default async function AccountPage() {
       }}
     >
       <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+
+        {/* ── Payment success callout ── */}
+        {paymentSuccess && (
+          <div
+            style={{
+              background: 'rgba(34,197,94,0.1)',
+              border: '1px solid rgba(34,197,94,0.35)',
+              borderRadius: '12px',
+              padding: '16px 20px',
+              marginBottom: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            }}
+          >
+            <span style={{ fontSize: '1.5rem' }}>🎉</span>
+            <p style={{ margin: 0, color: '#86efac', fontSize: '0.95rem', fontWeight: 500 }}>
+              Welcome to {tierLabel} — unlimited stories await!
+            </p>
+          </div>
+        )}
 
         {/* ── Header ── */}
         <div

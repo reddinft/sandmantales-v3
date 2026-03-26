@@ -130,3 +130,4 @@
 - `src/lib/supabase.ts` was split into two files (`supabase.ts` browser + `supabase-server.ts` server) to avoid Turbopack bundler errors from mixing `next/headers` with client-bound imports
 - No `src/middleware.ts` created — Next.js 16 uses `proxy.ts` exclusively (conflict would break build)
 - Build warning: `supabaseUrl is required` during static generation of `/api/story/count` — expected, uses fallback count, non-fatal
+Phase 5 fixes — SavePrompt modal + guest RPC migration — done
