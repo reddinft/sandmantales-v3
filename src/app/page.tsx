@@ -5,6 +5,7 @@ import { HowItWorksSection } from '@/components/homepage/HowItWorksSection'
 import { PricingSection } from '@/components/homepage/PricingSection'
 import { TestimonialSection } from '@/components/homepage/TestimonialSection'
 import { Footer } from '@/components/homepage/Footer'
+import { HomepageSignInGate } from '@/components/auth/HomepageSignInGate'
 
 const FALLBACK_COUNT = 1247
 
@@ -29,11 +30,20 @@ async function getStoryCount(): Promise<number> {
   }
 }
 
-export default async function HomePage() {
+interface HomePageProps {
+  searchParams: Promise<{ signin?: string }>
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
   const count = await getStoryCount()
+  const params = await searchParams
+  const autoOpenSignIn = params.signin === 'true'
 
   return (
     <main style={{ background: '#0D1B2A', minHeight: '100vh' }}>
+      {/* Auto-opens SignInModal when ?signin=true is in the URL */}
+      <HomepageSignInGate autoOpen={autoOpenSignIn} />
+
       <HeroSection />
       <SocialProofBar count={count} />
       <DemoSection />

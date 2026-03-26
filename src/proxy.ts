@@ -24,10 +24,14 @@ export async function proxy(request: NextRequest) {
     }
   )
 
+  // Refresh session (keeps auth cookies fresh on every request)
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Protect /account — redirect unauthenticated users to /?signin=true
   if (!user && request.nextUrl.pathname.startsWith('/account')) {
-    return NextResponse.redirect(new URL('/', request.url))
+    const redirectUrl = new URL('/', request.url)
+    redirectUrl.searchParams.set('signin', 'true')
+    return NextResponse.redirect(redirectUrl)
   }
 
   return supabaseResponse
