@@ -7,6 +7,7 @@ import { StoryDisplay } from './StoryDisplay'
 import { UpgradeWall } from './UpgradeWall'
 import { SavePrompt } from './SavePrompt'
 import { StoriesRemainingBadge } from './StoriesRemainingBadge'
+import { SignInModal } from '@/components/auth/SignInModal'
 
 const GUEST_COOKIE = 'smt_guest_id'
 const COOKIE_MAX_AGE = 604800 // 7 days
@@ -43,6 +44,7 @@ export function StoryCreationFlow({ isAuthed, userTier }: StoryCreationFlowProps
   const [showUpgradeWall, setShowUpgradeWall] = useState(false)
   const [showSavePrompt, setShowSavePrompt] = useState(false)
   const [savePromptDismissed, setSavePromptDismissed] = useState(false)
+  const [showSignInModal, setShowSignInModal] = useState(false)
   const [storiesRemaining, setStoriesRemaining] = useState<number | undefined>(undefined)
 
   // Initialise guest cookie on mount
@@ -182,15 +184,20 @@ export function StoryCreationFlow({ isAuthed, userTier }: StoryCreationFlowProps
           />
           {showSavePrompt && !isAuthed && (
             <SavePrompt
-              onSave={() => {
-                // Open sign-up — for now navigate to auth page
-                window.location.href = '/auth/signup'
-              }}
+              onSave={() => setShowSignInModal(true)}
               onDismiss={handleSavePromptDismiss}
             />
           )}
         </>
       )}
+
+      {/* Sign-in modal for save prompt */}
+      <SignInModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        initialTab="signup"
+        onSuccess={() => setShowSignInModal(false)}
+      />
 
       {/* Upgrade wall overlay */}
       {showUpgradeWall && (

@@ -54,7 +54,7 @@ export async function ensureGuestSession(guestSessionId: string): Promise<void> 
 
 export async function incrementGuestUsage(guestSessionId: string): Promise<void> {
   const supabase = getServiceClient()
-  await supabase.rpc('increment_guest_story_count', { session_id: guestSessionId })
+  await supabase.rpc('increment_guest_story_count', { p_session_id: guestSessionId })
     .then(async ({ error }) => {
       if (error) {
         // Fallback: manual increment
